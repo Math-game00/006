@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกม คณิต คิด หรรษา</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Comic Sans MS', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background: #FFAFE0;
+        }
+
+        #container {
+            text-align: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #start-screen, #game-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #start-screen {
+            background: url('เกม คณิต คิด หรรษา.jpg') no-repeat center center;
+            background-size: cover;
+        }
+
+        #game-screen {
+            background: url('math.jpg') no-repeat center center;
+            background-size: cover;
+        }
+
+        .button {
+            background-color: #FF69B4;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        #game-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        input {
+            font-size: 18px;
+            padding: 5px;
+            width: 80px;
+        }
+
+        .status {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="start-screen">
+            <button class="button" id="start-button">เริ่มเกม</button>
+        </div>
+        <div id="game-screen">
+            <div id="game-content">
+                <div id="question" class="status"></div>
+                <input type="text" id="answer" placeholder="คำตอบ">
+                <button class="button" id="check-button">ตรวจสอบ</button>
+                <div id="score" class="status">คะแนน: 0</div>
+                <div id="timer" class="status">เวลา: 1 นาที 30 วินาที</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const startButton = document.getElementById('start-button');
+        const question = document.getElementById('question');
+        const answerInput = document.getElementById('answer');
+        const checkButton = document.getElementById('check-button');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+
+        let score = 0;
+        let numQuestions = 0;
+        const totalQuestions = 10;
+        let timeLeft = 90;
+        let correctAnswer = 0;
+
+        startButton.addEventListener('click', startCountdown);
+        checkButton.addEventListener('click', checkAnswer);
+
+        function startCountdown() {
+            startScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+
+            let countdown = 3;
+            question.textContent = 'เตรียมพร้อม!';
+
+            const interval = setInterval(() => {
+                if (countdown > 0) {
+                    question.textContent = countdown;
+                    countdown--;
+                } else {
+                    clearInterval(interval);
+                    startGame();
+                }
+            }, 1000);
+        }
+
+        function startGame() {
+            generateQuestion();
+            startTimer();
+        }
+
+        function generateQuestion() {
+            const num1 = Math.floor(Math.random() * 20) + 1;
+            const num2 = Math.floor(Math.random() * 20) + 1;
+            const operations = ['+', '-', '*', '/'];
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+
+            if (operation === '/') {
+                correctAnswer = +(num1 / num2).toFixed(2);
+                question.textContent = `${num1} ÷ ${num2} = ?`;
+            } else if (operation === '+') {
+                correctAnswer = num1 + num2;
+                question.textContent = `${num1} + ${num2} = ?`;
+            } else if (operation === '-') {
+                correctAnswer = num1 - num2;
+                question.textContent = `${num1} - ${num2} = ?`;
+            } else {
+                correctAnswer = num1 * num2;
+                question.textContent = `${num1} × ${num2} = ?`;
+            }
+
+            answerInput.value = '';
+            answerInput.focus();
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseFloat(answerInput.value);
+
+            if (isNaN(userAnswer)) {
+                alert('โปรดป้อนตัวเลขเท่านั้น');
+                return;
+            }
+
+            if (Math.abs(userAnswer - correctAnswer) < 0.01) {
+                score++;
+                alert('คำตอบถูกต้อง!');
+            } else {
+                alert(`คำตอบที่ถูกคือ ${correctAnswer}`);
+            }
+
+            numQuestions++;
+            scoreDisplay.textContent = `คะแนน: ${score}`;
+
+            if (numQuestions >= totalQuestions) {
+                endGame();
+            } else {
+                generateQuestion();
+            }
+        }
+
+        function startTimer() {
+            const interval = setInterval(() => {
+                if (timeLeft > 0) {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerDisplay.textContent = `เวลา: ${minutes} นาที ${seconds} วินาที`;
+                    timeLeft--;
+                } else {
+                    clearInterval(interval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            const feedback = score >= 7 ? 'เก่งมาก!' : 'พยายามอีกครั้ง!';
+            alert(`จบเกม! คะแนนของคุณคือ ${score}/${totalQuestions}\n${feedback}`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
